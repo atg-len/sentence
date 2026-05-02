@@ -1,0 +1,381 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.app{display:flex;flex-direction:column;min-height:600px;padding:0 0 2rem}
+.tabs{display:flex;gap:4px;padding:1rem 0 0;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem}
+.tab{padding:8px 16px;font-size:13px;border-radius:var(--border-radius-md) var(--border-radius-md) 0 0;border:0.5px solid transparent;cursor:pointer;color:var(--color-text-secondary);background:transparent;transition:all .15s}
+.tab.active{background:var(--color-background-primary);border-color:var(--color-border-tertiary);border-bottom-color:var(--color-background-primary);color:var(--color-text-primary);font-weight:500;margin-bottom:-0.5px}
+.tab:hover:not(.active){color:var(--color-text-primary)}
+.section{display:none}.section.active{display:block}
+.row{display:flex;gap:8px;margin-bottom:1rem;align-items:center}
+input[type=text],textarea,select{font-size:14px;font-family:var(--font-sans)}
+textarea{width:100%;min-height:120px;resize:vertical;font-size:13px;padding:10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary)}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;background:var(--color-background-info);color:var(--color-text-info)}
+.badge.bookmarked{background:var(--color-background-warning);color:var(--color-text-warning)}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:.75rem;position:relative}
+.card:hover{border-color:var(--color-border-secondary)}
+.card-head{display:flex;align-items:center;gap:8px;margin-bottom:.5rem;flex-wrap:wrap}
+.card-grammar{font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px}
+.sent-zh{font-size:15px;color:var(--color-text-primary);line-height:1.8;margin-bottom:.25rem}
+.sent-en{font-size:13px;color:var(--color-text-secondary);font-style:italic;line-height:1.7}
+.card-actions{display:flex;gap:6px;margin-top:.75rem}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;color:var(--color-text-secondary);transition:all .12s}
+.btn-sm:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.btn-sm.danger:hover{background:#FCEBEB;color:#A32D2D;border-color:#F09595}
+.btn-sm.bookmark-btn.active{background:var(--color-background-warning);color:var(--color-text-warning);border-color:#EF9F27}
+.btn-primary{padding:8px 20px;font-size:13px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);cursor:pointer;font-weight:500;transition:opacity .12s}
+.btn-primary:hover{opacity:.85}
+.filter-bar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.filter-pill{padding:5px 14px;font-size:12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;color:var(--color-text-secondary);transition:all .12s}
+.filter-pill.active{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
+.filter-pill:hover:not(.active){background:var(--color-background-secondary)}
+.search-wrap{flex:1;min-width:180px;position:relative}
+.search-wrap input{width:100%;padding:7px 10px 7px 32px;font-size:13px;border:0.5px solid var(--color-border-secondary);border-radius:20px;background:var(--color-background-secondary)}
+.search-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--color-text-tertiary)}
+.empty{text-align:center;padding:3rem 0;color:var(--color-text-tertiary);font-size:14px}
+.practice-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.5rem;margin-bottom:1rem}
+.practice-counter{font-size:12px;color:var(--color-text-tertiary);margin-bottom:1rem}
+.practice-grammar-label{display:inline-block;margin-bottom:1rem}
+.blur-grammar,.blur-vocab{filter:blur(5px);cursor:pointer;transition:filter .25s;display:inline;border-radius:4px;padding:0 2px}
+.blur-grammar.revealed,.blur-vocab.revealed{filter:none;cursor:default}
+.blur-vocab{background:var(--color-background-info);color:var(--color-text-info)}
+.blur-grammar{background:var(--color-background-warning);color:var(--color-text-warning)}
+.hint-text{font-size:12px;color:var(--color-text-tertiary);margin-top:.75rem}
+.practice-zh{font-size:16px;line-height:2;margin-bottom:.5rem}
+.practice-controls{display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap}
+.progress-bar{height:4px;background:var(--color-background-secondary);border-radius:2px;margin-bottom:1.5rem;overflow:hidden}
+.progress-fill{height:100%;background:var(--color-text-primary);border-radius:2px;transition:width .3s}
+.import-hint{font-size:12px;color:var(--color-text-tertiary);margin-top:.5rem;line-height:1.6}
+.grammar-colors{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.revealed-count{font-size:12px;color:var(--color-text-secondary);margin-top:.5rem}
+.section-title{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em}
+.edit-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:100;display:flex;align-items:center;justify-content:center}
+.edit-box{background:var(--color-background-primary);border-radius:var(--border-radius-lg);padding:1.5rem;width:90%;max-width:520px;border:0.5px solid var(--color-border-primary)}
+.edit-box h3{font-size:15px;font-weight:500;margin-bottom:1rem}
+.form-row{margin-bottom:.75rem}
+.form-row label{display:block;font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+.form-row input,.form-row select,.form-row textarea{width:100%}
+</style>
+
+<div class="app">
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('library')">句庫</button>
+  <button class="tab" onclick="switchTab('practice')">練習模式</button>
+  <button class="tab" onclick="switchTab('import')">批量導入</button>
+</div>
+
+<div id="tab-library" class="section active">
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <span class="search-ico">🔍</span>
+      <input type="text" id="search-input" placeholder="搜尋句子..." oninput="renderLibrary()">
+    </div>
+    <div id="grammar-filters" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    <button class="filter-pill active" id="filter-all" onclick="setFilter('all')">全部</button>
+    <button class="filter-pill" id="filter-bookmarked" onclick="setFilter('bookmarked')">⭐ 已標記</button>
+  </div>
+  <div id="library-list"></div>
+  <button class="btn-primary" onclick="openAdd()" style="margin-top:.5rem">+ 新增句子</button>
+</div>
+
+<div id="tab-practice" class="section">
+  <div class="filter-bar">
+    <div id="practice-grammar-filters" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    <button class="filter-pill active" id="pf-all" onclick="setPracticeFilter('all')">全部</button>
+    <button class="filter-pill" id="pf-bookmarked" onclick="setPracticeFilter('bookmarked')">⭐ 已標記</button>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  <div id="practice-area"></div>
+</div>
+
+<div id="tab-import" class="section">
+  <p class="section-title">批量導入格式</p>
+  <div class="card" style="margin-bottom:1rem;padding:.75rem 1rem">
+    <p style="font-size:12px;color:var(--color-text-secondary);line-height:1.8">每行一個句子，格式：<br>
+    <code style="font-size:11px;background:var(--color-background-secondary);padding:2px 6px;border-radius:4px">語法分類 | 中文句子 | 英文句子</code><br>
+    括號內詞彙 <code style="font-size:11px;background:var(--color-background-secondary);padding:2px 6px;border-radius:4px">(選項1 / 選項2)</code> 會成為練習時的提示點</p>
+  </div>
+  <textarea id="import-area" placeholder="Reduced Relative Clause | 住在繁忙城市(busy / densely populated cities)的學生，往往承受更大(greater / heavier)的學業(academic)壓力。 | Students living in busy cities tend to face greater academic pressure.
+Passive Voice | 這本書(book)是由一位著名(famous / renowned)作家寫的。 | This book was written by a famous author."></textarea>
+  <p class="import-hint">💡 格式：語法分類 | 中文句 | 英文句 （括號詞彙練習時會模糊）</p>
+  <div style="display:flex;gap:8px;margin-top:1rem">
+    <button class="btn-primary" onclick="importSentences()">導入句子</button>
+    <button class="btn-sm" onclick="document.getElementById('import-area').value=''">清空</button>
+  </div>
+  <div id="import-msg" style="margin-top:.75rem;font-size:13px"></div>
+</div>
+</div>
+
+<div id="edit-overlay" style="display:none" class="edit-overlay" onclick="closeEditIfOutside(event)">
+<div class="edit-box">
+  <h3 id="edit-title">新增句子</h3>
+  <div class="form-row">
+    <label>語法分類</label>
+    <input type="text" id="edit-grammar" placeholder="e.g. Reduced Relative Clause" list="grammar-datalist">
+    <datalist id="grammar-datalist"></datalist>
+  </div>
+  <div class="form-row">
+    <label>中文句子（括號內詞彙會模糊，可提示）</label>
+    <textarea id="edit-zh" rows="3" placeholder="住在繁忙城市(busy / densely populated cities)的學生..."></textarea>
+  </div>
+  <div class="form-row">
+    <label>英文句子</label>
+    <textarea id="edit-en" rows="2" placeholder="Students living in busy cities..."></textarea>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:1rem">
+    <button class="btn-primary" onclick="saveEdit()">儲存</button>
+    <button class="btn-sm" onclick="closeEdit()">取消</button>
+  </div>
+</div>
+</div>
+
+<script>
+const GRAMMAR_PALETTE = ['#B5D4F4','#9FE1CB','#FAC775','#F4C0D1','#CCC','#C0DD97','#F5C4B3','#AFA9EC'];
+const GRAMMAR_TEXT_PALETTE=['#185FA5','#0F6E56','#BA7517','#993556','#444','#3B6D11','#993C1D','#534AB7'];
+
+let sentences = [
+  {id:1,grammar:'Reduced Relative Clause',zh:'住在繁忙城市(busy / densely populated cities)的學生，往往承受更大(greater / heavier)的學業(academic)壓力。',en:'Students living in busy cities tend to face greater academic pressure.',bookmarked:false},
+  {id:2,grammar:'Passive Voice',zh:'這本書(book / novel)是由一位著名(famous / renowned)作家所撰寫的。',en:'This book was written by a famous author.',bookmarked:false},
+  {id:3,grammar:'Conditional Sentence',zh:'如果學生(students)每天練習(practise / review)英文，他們的成績(grades / results)會大幅提升。',en:'If students practise English every day, their grades will improve significantly.',bookmarked:false},
+];
+let nextId = 4;
+let currentFilter = 'all';
+let practiceFilter = 'all';
+let practiceGrammarFilter = 'all';
+let editingId = null;
+let grammarColorMap = {};
+
+function getGrammarColor(g){
+  const keys = Object.keys(grammarColorMap);
+  if(!grammarColorMap[g]){
+    const i = keys.length % GRAMMAR_PALETTE.length;
+    grammarColorMap[g]={bg:GRAMMAR_PALETTE[i],text:GRAMMAR_TEXT_PALETTE[i]};
+  }
+  return grammarColorMap[g];
+}
+
+function allGrammars(){return [...new Set(sentences.map(s=>s.grammar))]}
+
+function filteredSentences(){
+  const q = document.getElementById('search-input').value.toLowerCase();
+  return sentences.filter(s=>{
+    const matchFilter = currentFilter==='all'||(currentFilter==='bookmarked'&&s.bookmarked)||(s.grammar===currentFilter);
+    const matchQ = !q||s.zh.toLowerCase().includes(q)||s.en.toLowerCase().includes(q)||s.grammar.toLowerCase().includes(q);
+    return matchFilter&&matchQ;
+  });
+}
+
+function setFilter(f){
+  currentFilter=f;
+  document.querySelectorAll('#tab-library .filter-pill').forEach(p=>p.classList.remove('active'));
+  if(f==='all') document.getElementById('filter-all').classList.add('active');
+  else if(f==='bookmarked') document.getElementById('filter-bookmarked').classList.add('active');
+  else{
+    const btns=document.querySelectorAll('#grammar-filters .filter-pill');
+    btns.forEach(b=>{if(b.dataset.grammar===f)b.classList.add('active')});
+  }
+  renderLibrary();
+}
+
+function setPracticeFilter(f){
+  practiceFilter=f;
+  document.querySelectorAll('#tab-practice .filter-pill').forEach(p=>p.classList.remove('active'));
+  if(f==='all') document.getElementById('pf-all').classList.add('active');
+  else if(f==='bookmarked') document.getElementById('pf-bookmarked').classList.add('active');
+  else{
+    const btns=document.querySelectorAll('#practice-grammar-filters .filter-pill');
+    btns.forEach(b=>{if(b.dataset.grammar===f)b.classList.add('active')});
+  }
+  renderPractice();
+}
+
+function renderGrammarFilters(){
+  const g=allGrammars();
+  const fbar=document.getElementById('grammar-filters');
+  fbar.innerHTML='';
+  g.forEach(grammar=>{
+    const {bg,text}=getGrammarColor(grammar);
+    const btn=document.createElement('button');
+    btn.className='filter-pill';
+    btn.dataset.grammar=grammar;
+    btn.textContent=grammar;
+    btn.style.cssText=`background:${currentFilter===grammar?bg:'transparent'};color:${currentFilter===grammar?text:'var(--color-text-secondary)'};border-color:${bg}`;
+    btn.onclick=()=>setFilter(grammar);
+    fbar.appendChild(btn);
+  });
+  const pfbar=document.getElementById('practice-grammar-filters');
+  pfbar.innerHTML='';
+  g.forEach(grammar=>{
+    const {bg,text}=getGrammarColor(grammar);
+    const btn=document.createElement('button');
+    btn.className='filter-pill';
+    btn.dataset.grammar=grammar;
+    btn.textContent=grammar;
+    btn.style.cssText=`background:${practiceFilter===grammar?bg:'transparent'};color:${practiceFilter===grammar?text:'var(--color-text-secondary)'};border-color:${bg}`;
+    btn.onclick=()=>setPracticeFilter(grammar);
+    pfbar.appendChild(btn);
+  });
+  const dl=document.getElementById('grammar-datalist');
+  dl.innerHTML=g.map(gr=>`<option value="${gr}">`).join('');
+}
+
+function renderZhWithBlanks(zh,mode='display'){
+  if(mode==='display') return zh.replace(/\(([^)]+)\)/g,'<span style="font-size:11px;color:var(--color-text-tertiary)">($1)</span>');
+  return zh.replace(/\(([^)]+)\)/g,(m,vocab)=>`<span class="blur-vocab" onclick="this.classList.toggle(\'revealed\')">${vocab}</span>`);
+}
+
+function renderLibrary(){
+  renderGrammarFilters();
+  const list=document.getElementById('library-list');
+  const items=filteredSentences();
+  if(!items.length){list.innerHTML='<div class="empty">沒有找到句子</div>';return}
+  list.innerHTML=items.map(s=>{
+    const {bg,text}=getGrammarColor(s.grammar);
+    return`<div class="card" id="card-${s.id}">
+      <div class="card-head">
+        <span class="card-grammar" style="background:${bg};color:${text}">${s.grammar}</span>
+        ${s.bookmarked?'<span class="badge bookmarked">⭐ 已標記</span>':''}
+      </div>
+      <div class="sent-zh">${renderZhWithBlanks(s.zh)}</div>
+      <div class="sent-en">${s.en}</div>
+      <div class="card-actions">
+        <button class="btn-sm bookmark-btn${s.bookmarked?' active':''}" onclick="toggleBookmark(${s.id})">${s.bookmarked?'⭐ 已標記':'☆ 標記'}</button>
+        <button class="btn-sm" onclick="openEdit(${s.id})">✏ 編輯</button>
+        <button class="btn-sm danger" onclick="deleteSentence(${s.id})">✕ 刪除</button>
+      </div>
+    </div>`}).join('');
+}
+
+let practiceItems=[];
+let practiceIdx=0;
+
+function getPracticePool(){
+  return sentences.filter(s=>{
+    const matchFilter=practiceFilter==='all'||(practiceFilter==='bookmarked'&&s.bookmarked)||(s.grammar===practiceFilter);
+    return matchFilter;
+  });
+}
+
+function renderPractice(){
+  renderGrammarFilters();
+  const pool=getPracticePool();
+  if(!pool.length){document.getElementById('practice-area').innerHTML='<div class="empty">沒有可練習的句子</div>';return}
+  practiceItems=[...pool].sort(()=>Math.random()-.5);
+  practiceIdx=0;
+  showPracticeCard();
+}
+
+function showPracticeCard(){
+  const pool=practiceItems;
+  if(!pool.length)return;
+  const pct=Math.round((practiceIdx/pool.length)*100);
+  document.getElementById('progress-fill').style.width=pct+'%';
+  const s=pool[practiceIdx];
+  const {bg,text}=getGrammarColor(s.grammar);
+  const zhBlurred=s.zh.replace(/\(([^)]+)\)/g,(m,vocab)=>`<span class="blur-vocab" onclick="revealVocab(this)">${vocab}</span>`);
+  document.getElementById('practice-area').innerHTML=`
+    <div class="practice-card">
+      <div class="practice-counter">${practiceIdx+1} / ${pool.length}</div>
+      <span class="badge practice-grammar-label blur-grammar" id="grammar-badge" onclick="revealGrammar()" style="background:${bg};color:${text}">${s.grammar}</span>
+      <div class="practice-zh" id="practice-zh">${zhBlurred}</div>
+      <div class="hint-text" id="hint-text">點擊括號內詞彙或語法標籤可顯示提示</div>
+      <div class="practice-controls">
+        <button class="btn-sm" onclick="revealAll()">全部顯示</button>
+        <button class="btn-sm" onclick="showAnswer()">看英文</button>
+        <button class="btn-sm bookmark-btn${s.bookmarked?' active':''}" id="practice-bm" onclick="toggleBookmarkPractice(${s.id})">${s.bookmarked?'⭐ 已標記':'☆ 標記'}</button>
+        ${practiceIdx+1<pool.length?`<button class="btn-primary" onclick="nextCard()" style="margin-left:auto">下一句 →</button>`:`<button class="btn-primary" onclick="renderPractice()" style="margin-left:auto">重新練習</button>`}
+      </div>
+      <div id="answer-area" style="display:none;margin-top:.75rem;padding-top:.75rem;border-top:0.5px solid var(--color-border-tertiary)">
+        <p style="font-size:13px;color:var(--color-text-secondary);font-style:italic">${s.en}</p>
+      </div>
+    </div>`;
+}
+
+function revealVocab(el){el.classList.add('revealed')}
+function revealGrammar(){document.getElementById('grammar-badge').classList.add('revealed')}
+function revealAll(){
+  document.querySelectorAll('.blur-vocab,.blur-grammar').forEach(el=>el.classList.add('revealed'));
+}
+function showAnswer(){document.getElementById('answer-area').style.display='block'}
+function nextCard(){
+  if(practiceIdx<practiceItems.length-1){practiceIdx++;showPracticeCard()}
+}
+function toggleBookmarkPractice(id){
+  const s=sentences.find(x=>x.id===id);
+  if(s){s.bookmarked=!s.bookmarked;showPracticeCard();renderLibrary()}
+}
+
+function toggleBookmark(id){
+  const s=sentences.find(x=>x.id===id);
+  if(s){s.bookmarked=!s.bookmarked;renderLibrary()}
+}
+function deleteSentence(id){
+  sentences=sentences.filter(s=>s.id!==id);
+  renderLibrary();
+}
+function openAdd(){
+  editingId=null;
+  document.getElementById('edit-title').textContent='新增句子';
+  document.getElementById('edit-grammar').value='';
+  document.getElementById('edit-zh').value='';
+  document.getElementById('edit-en').value='';
+  document.getElementById('edit-overlay').style.display='flex';
+}
+function openEdit(id){
+  const s=sentences.find(x=>x.id===id);
+  if(!s)return;
+  editingId=id;
+  document.getElementById('edit-title').textContent='編輯句子';
+  document.getElementById('edit-grammar').value=s.grammar;
+  document.getElementById('edit-zh').value=s.zh;
+  document.getElementById('edit-en').value=s.en;
+  document.getElementById('edit-overlay').style.display='flex';
+}
+function closeEdit(){document.getElementById('edit-overlay').style.display='none'}
+function closeEditIfOutside(e){if(e.target.id==='edit-overlay')closeEdit()}
+function saveEdit(){
+  const g=document.getElementById('edit-grammar').value.trim();
+  const zh=document.getElementById('edit-zh').value.trim();
+  const en=document.getElementById('edit-en').value.trim();
+  if(!g||!zh){return}
+  if(editingId){
+    const s=sentences.find(x=>x.id===editingId);
+    if(s){s.grammar=g;s.zh=zh;s.en=en}
+  }else{
+    sentences.push({id:nextId++,grammar:g,zh,en,bookmarked:false});
+  }
+  closeEdit();renderLibrary();
+}
+
+function importSentences(){
+  const raw=document.getElementById('import-area').value.trim();
+  const lines=raw.split('\n').filter(l=>l.trim());
+  let added=0,skipped=0;
+  lines.forEach(line=>{
+    const parts=line.split('|').map(p=>p.trim());
+    if(parts.length>=2){
+      const grammar=parts[0];
+      const zh=parts[1];
+      const en=parts[2]||'';
+      sentences.push({id:nextId++,grammar,zh,en,bookmarked:false});
+      added++;
+    }else{skipped++}
+  });
+  const msg=document.getElementById('import-msg');
+  msg.style.color=added?'var(--color-text-success)':'var(--color-text-danger)';
+  msg.textContent=`✓ 成功導入 ${added} 條句子${skipped?`，跳過 ${skipped} 行（格式錯誤）`:''}`;
+  renderLibrary();renderGrammarFilters();
+}
+
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelector(`.tab[onclick="switchTab('${t}')"]`).classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='practice')renderPractice();
+  if(t==='library')renderLibrary();
+}
+
+renderLibrary();
+</script>
