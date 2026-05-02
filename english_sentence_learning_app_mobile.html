@@ -1,0 +1,337 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--font-sans);font-size:16px}
+.app{display:flex;flex-direction:column;padding:0 0 2rem}
+.tabs{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.25rem;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tab{padding:10px 16px;font-size:14px;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--color-text-secondary);background:transparent;white-space:nowrap;flex-shrink:0}
+.tab.active{border-bottom-color:var(--color-text-primary);color:var(--color-text-primary);font-weight:500}
+.section{display:none}.section.active{display:block}
+input[type=text],textarea,select{font-size:16px;font-family:var(--font-sans);-webkit-appearance:none;appearance:none}
+textarea{width:100%;min-height:100px;resize:vertical;padding:10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary)}
+.search-box{width:100%;padding:10px 10px 10px 36px;font-size:16px;border:0.5px solid var(--color-border-secondary);border-radius:24px;background:var(--color-background-secondary);color:var(--color-text-primary)}
+.search-wrap{position:relative;margin-bottom:10px}
+.search-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--color-text-tertiary);pointer-events:none}
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.filter-pill{padding:6px 14px;font-size:13px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;color:var(--color-text-secondary);white-space:nowrap;-webkit-appearance:none}
+.filter-pill.active{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:10px}
+.card-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.grammar-tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
+.sent-zh{font-size:15px;color:var(--color-text-primary);line-height:1.9;margin-bottom:4px}
+.sent-en{font-size:13px;color:var(--color-text-secondary);font-style:italic;line-height:1.6}
+.card-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.btn-sm{padding:7px 12px;font-size:13px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;color:var(--color-text-secondary);-webkit-appearance:none}
+.btn-sm.bm-active{background:var(--color-background-warning);color:var(--color-text-warning);border-color:#EF9F27}
+.btn-sm.danger-act{background:#FCEBEB;color:#A32D2D;border-color:#F09595}
+.btn-primary{padding:10px 20px;font-size:14px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);cursor:pointer;font-weight:500;-webkit-appearance:none;display:inline-block}
+.empty{text-align:center;padding:3rem 0;color:var(--color-text-tertiary);font-size:14px}
+.progress-bar{height:4px;background:var(--color-background-secondary);border-radius:2px;margin-bottom:1.25rem;overflow:hidden}
+.progress-fill{height:100%;background:var(--color-text-primary);border-radius:2px;transition:width .3s}
+.practice-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:20px 16px;margin-bottom:10px}
+.practice-counter{font-size:12px;color:var(--color-text-tertiary);margin-bottom:12px}
+.practice-zh{font-size:17px;line-height:2.1;margin:12px 0 4px}
+.hint-text{font-size:12px;color:var(--color-text-tertiary);margin-top:8px}
+.practice-controls{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.blur-vocab{filter:blur(5px);-webkit-filter:blur(5px);cursor:pointer;display:inline;border-radius:4px;padding:0 2px;background:var(--color-background-info);color:var(--color-text-info);transition:filter .25s;-webkit-transition:-webkit-filter .25s;user-select:none;-webkit-user-select:none}
+.blur-vocab.revealed{filter:none;-webkit-filter:none}
+.blur-grammar{filter:blur(5px);-webkit-filter:blur(5px);cursor:pointer;display:inline-block;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:500;transition:filter .25s;-webkit-transition:-webkit-filter .25s;user-select:none;-webkit-user-select:none}
+.blur-grammar.revealed{filter:none;-webkit-filter:none}
+.answer-area{display:none;margin-top:12px;padding-top:12px;border-top:0.5px solid var(--color-border-tertiary)}
+.import-hint{font-size:12px;color:var(--color-text-tertiary);margin-top:8px;line-height:1.7}
+.import-format{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px;font-size:12px;color:var(--color-text-secondary);line-height:1.9;margin-bottom:12px}
+code{font-size:11px;background:var(--color-background-tertiary);padding:2px 6px;border-radius:4px;font-family:var(--font-mono)}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:200;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px}
+.modal-box{background:var(--color-background-primary);border-radius:var(--border-radius-lg);padding:20px 16px;width:100%;max-width:500px;margin:auto;border:0.5px solid var(--color-border-secondary)}
+.modal-box h3{font-size:16px;font-weight:500;margin-bottom:16px}
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:12px;color:var(--color-text-secondary);margin-bottom:5px}
+.form-row input,.form-row textarea{width:100%;padding:10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+</style>
+
+<div class="app">
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('library')">📚 句庫</button>
+  <button class="tab" onclick="switchTab('practice')">✏️ 練習</button>
+  <button class="tab" onclick="switchTab('import')">📥 導入</button>
+</div>
+
+<div id="tab-library" class="section active">
+  <div class="search-wrap">
+    <span class="search-ico">🔍</span>
+    <input class="search-box" type="text" id="search-input" placeholder="搜尋句子..." oninput="renderLibrary()">
+  </div>
+  <div class="filter-bar">
+    <button class="filter-pill active" id="filter-all" onclick="setFilter('all')">全部</button>
+    <button class="filter-pill" id="filter-bookmarked" onclick="setFilter('bookmarked')">⭐ 已標記</button>
+    <div id="grammar-filters" style="display:contents"></div>
+  </div>
+  <div id="library-list"></div>
+  <button class="btn-primary" onclick="openAdd()">+ 新增句子</button>
+</div>
+
+<div id="tab-practice" class="section">
+  <div class="filter-bar">
+    <button class="filter-pill active" id="pf-all" onclick="setPracticeFilter('all')">全部</button>
+    <button class="filter-pill" id="pf-bookmarked" onclick="setPracticeFilter('bookmarked')">⭐ 已標記</button>
+    <div id="practice-grammar-filters" style="display:contents"></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <div id="practice-area"></div>
+</div>
+
+<div id="tab-import" class="section">
+  <div class="import-format">
+    每行一句，格式：<br>
+    <code>語法分類 | 中文句子 | 英文句子</code><br>
+    括號 <code>(選項1 / 選項2)</code> 練習時會模糊，可點擊顯示
+  </div>
+  <textarea id="import-area" rows="6" placeholder="Reduced Relative Clause | 住在繁忙城市(busy / densely populated cities)的學生，往往承受更大(greater / heavier)的學業(academic)壓力。 | Students living in busy cities tend to face greater academic pressure."></textarea>
+  <p class="import-hint">💡 格式：語法 | 中文（括號詞彙） | 英文</p>
+  <div style="display:flex;gap:8px;margin-top:12px">
+    <button class="btn-primary" onclick="importSentences()">導入</button>
+    <button class="btn-sm" onclick="document.getElementById('import-area').value=''">清空</button>
+  </div>
+  <div id="import-msg" style="margin-top:10px;font-size:13px"></div>
+</div>
+</div>
+
+<div id="modal-overlay" class="modal-overlay" onclick="closeEditIfOutside(event)">
+<div class="modal-box">
+  <h3 id="edit-title">新增句子</h3>
+  <div class="form-row">
+    <label>語法分類</label>
+    <input type="text" id="edit-grammar" placeholder="e.g. Reduced Relative Clause" list="grammar-datalist">
+    <datalist id="grammar-datalist"></datalist>
+  </div>
+  <div class="form-row">
+    <label>中文句子（括號內詞彙練習時會模糊）</label>
+    <textarea id="edit-zh" rows="3" placeholder="住在繁忙城市(busy / densely populated cities)的學生..."></textarea>
+  </div>
+  <div class="form-row">
+    <label>英文句子</label>
+    <textarea id="edit-en" rows="2" placeholder="Students living in busy cities..."></textarea>
+  </div>
+  <div class="modal-actions">
+    <button class="btn-primary" onclick="saveEdit()">儲存</button>
+    <button class="btn-sm" onclick="closeEdit()">取消</button>
+  </div>
+</div>
+</div>
+
+<script>
+var GRAM_BG=['#B5D4F4','#9FE1CB','#FAC775','#F4C0D1','#C0DD97','#F5C4B3','#AFA9EC','#ddd'];
+var GRAM_TX=['#185FA5','#0F6E56','#BA7517','#993556','#3B6D11','#993C1D','#534AB7','#555'];
+var sentences=[
+  {id:1,grammar:'Reduced Relative Clause',zh:'住在繁忙城市(busy / densely populated cities)的學生，往往承受更大(greater / heavier)的學業(academic)壓力。',en:'Students living in busy cities tend to face greater academic pressure.',bookmarked:false},
+  {id:2,grammar:'Passive Voice',zh:'這本書(book / novel)是由一位著名(famous / renowned)作家所撰寫的。',en:'This book was written by a famous author.',bookmarked:false},
+  {id:3,grammar:'Conditional Sentence',zh:'如果學生(students)每天練習(practise / review)英文，他們的成績(grades / results)會大幅提升。',en:'If students practise English every day, their grades will improve significantly.',bookmarked:false},
+];
+var nextId=4;
+var currentFilter='all';
+var practiceFilter='all';
+var gramColorMap={};
+var editingId=null;
+var practicePool=[];
+var practiceIdx=0;
+
+function gramColor(g){
+  if(!gramColorMap[g]){
+    var n=Object.keys(gramColorMap).length%GRAM_BG.length;
+    gramColorMap[g]={bg:GRAM_BG[n],tx:GRAM_TX[n]};
+  }
+  return gramColorMap[g];
+}
+function allGrammars(){return[...new Set(sentences.map(function(s){return s.grammar}))]}
+
+function setFilter(f){
+  currentFilter=f;
+  renderLibrary();
+}
+function setPracticeFilter(f){
+  practiceFilter=f;
+  renderPractice();
+}
+
+function renderFilters(){
+  var gs=allGrammars();
+  var fbar=document.getElementById('grammar-filters');
+  fbar.innerHTML='';
+  gs.forEach(function(g){
+    var c=gramColor(g);
+    var b=document.createElement('button');
+    b.className='filter-pill'+(currentFilter===g?' active':'');
+    b.textContent=g;
+    b.style.cssText='border-color:'+c.bg+';'+(currentFilter===g?'background:'+c.bg+';color:'+c.tx+';':'');
+    b.onclick=(function(g2){return function(){setFilter(g2)}})(g);
+    fbar.appendChild(b);
+  });
+  var pfbar=document.getElementById('practice-grammar-filters');
+  pfbar.innerHTML='';
+  gs.forEach(function(g){
+    var c=gramColor(g);
+    var b=document.createElement('button');
+    b.className='filter-pill'+(practiceFilter===g?' active':'');
+    b.textContent=g;
+    b.style.cssText='border-color:'+c.bg+';'+(practiceFilter===g?'background:'+c.bg+';color:'+c.tx+';':'');
+    b.onclick=(function(g2){return function(){setPracticeFilter(g2)}})(g);
+    pfbar.appendChild(b);
+  });
+  document.getElementById('filter-all').className='filter-pill'+(currentFilter==='all'?' active':'');
+  document.getElementById('filter-bookmarked').className='filter-pill'+(currentFilter==='bookmarked'?' active':'');
+  document.getElementById('pf-all').className='filter-pill'+(practiceFilter==='all'?' active':'');
+  document.getElementById('pf-bookmarked').className='filter-pill'+(practiceFilter==='bookmarked'?' active':'');
+  var dl=document.getElementById('grammar-datalist');
+  dl.innerHTML=gs.map(function(g){return'<option value="'+g+'">'}).join('');
+}
+
+function filteredSentences(){
+  var q=(document.getElementById('search-input').value||'').toLowerCase();
+  return sentences.filter(function(s){
+    var mf=currentFilter==='all'||(currentFilter==='bookmarked'&&s.bookmarked)||(s.grammar===currentFilter);
+    var mq=!q||s.zh.toLowerCase().indexOf(q)>=0||s.en.toLowerCase().indexOf(q)>=0||s.grammar.toLowerCase().indexOf(q)>=0;
+    return mf&&mq;
+  });
+}
+
+function renderLibrary(){
+  renderFilters();
+  var items=filteredSentences();
+  var list=document.getElementById('library-list');
+  if(!items.length){list.innerHTML='<div class="empty">沒有找到句子</div>';return}
+  list.innerHTML=items.map(function(s){
+    var c=gramColor(s.grammar);
+    var zhDisp=s.zh.replace(/\(([^)]+)\)/g,'<span style="font-size:11px;color:var(--color-text-tertiary)">($1)</span>');
+    return'<div class="card">'+
+      '<div class="card-head"><span class="grammar-tag" style="background:'+c.bg+';color:'+c.tx+'">'+s.grammar+'</span>'+(s.bookmarked?'<span style="font-size:11px;color:var(--color-text-warning)">⭐ 已標記</span>':'')+'</div>'+
+      '<div class="sent-zh">'+zhDisp+'</div>'+
+      '<div class="sent-en">'+s.en+'</div>'+
+      '<div class="card-actions">'+
+        '<button class="btn-sm'+(s.bookmarked?' bm-active':'')+'" onclick="toggleBm('+s.id+')">'+(s.bookmarked?'⭐ 已標記':'☆ 標記')+'</button>'+
+        '<button class="btn-sm" onclick="openEdit('+s.id+')">✏ 編輯</button>'+
+        '<button class="btn-sm" onclick="confirmDel('+s.id+')">✕ 刪除</button>'+
+      '</div></div>';
+  }).join('');
+}
+
+function toggleBm(id){
+  var s=sentences.find(function(x){return x.id===id});
+  if(s)s.bookmarked=!s.bookmarked;
+  renderLibrary();
+}
+function confirmDel(id){
+  if(confirm('確認刪除這個句子？')){
+    sentences=sentences.filter(function(s){return s.id!==id});
+    renderLibrary();
+  }
+}
+
+function renderPractice(){
+  renderFilters();
+  practicePool=sentences.filter(function(s){
+    return practiceFilter==='all'||(practiceFilter==='bookmarked'&&s.bookmarked)||(s.grammar===practiceFilter);
+  }).sort(function(){return Math.random()-.5});
+  practiceIdx=0;
+  showPCard();
+}
+
+function showPCard(){
+  var area=document.getElementById('practice-area');
+  if(!practicePool.length){area.innerHTML='<div class="empty">沒有可練習的句子<br><br><button class="btn-primary" onclick="switchTab(\'import\')">去導入句子</button></div>';return}
+  var pct=Math.round(practiceIdx/practicePool.length*100);
+  document.getElementById('progress-fill').style.width=pct+'%';
+  var s=practicePool[practiceIdx];
+  var c=gramColor(s.grammar);
+  var zhB=s.zh.replace(/\(([^)]+)\)/g,function(m,v){
+    return'<span class="blur-vocab" onclick="this.classList.add(\'revealed\')">'+v+'</span>';
+  });
+  area.innerHTML='<div class="practice-card">'+
+    '<div class="practice-counter">'+(practiceIdx+1)+' / '+practicePool.length+'</div>'+
+    '<span class="blur-grammar" id="gram-badge" style="background:'+c.bg+';color:'+c.tx+'" onclick="document.getElementById(\'gram-badge\').classList.add(\'revealed\')">'+s.grammar+'</span>'+
+    '<div class="practice-zh">'+zhB+'</div>'+
+    '<p class="hint-text">點擊模糊處顯示提示 👆</p>'+
+    '<div class="practice-controls">'+
+      '<button class="btn-sm" onclick="revealAllPractice()">全部顯示</button>'+
+      '<button class="btn-sm" onclick="document.getElementById(\'ans-area\').style.display=\'block\'">看英文</button>'+
+      '<button class="btn-sm'+(s.bookmarked?' bm-active':'')+'" onclick="toggleBmP('+s.id+')">'+(s.bookmarked?'⭐ 已標記':'☆ 標記')+'</button>'+
+      (practiceIdx+1<practicePool.length
+        ?'<button class="btn-primary" onclick="nextCard()" style="margin-left:auto">下一句 →</button>'
+        :'<button class="btn-primary" onclick="renderPractice()" style="margin-left:auto">重新開始</button>')+
+    '</div>'+
+    '<div class="answer-area" id="ans-area"><p style="font-size:14px;color:var(--color-text-secondary);font-style:italic">'+s.en+'</p></div>'+
+  '</div>';
+}
+
+function revealAllPractice(){
+  document.querySelectorAll('.blur-vocab,.blur-grammar').forEach(function(el){el.classList.add('revealed')});
+}
+function nextCard(){practiceIdx++;showPCard()}
+function toggleBmP(id){
+  var s=sentences.find(function(x){return x.id===id});
+  if(s)s.bookmarked=!s.bookmarked;
+  showPCard();renderLibrary();
+}
+
+function openAdd(){
+  editingId=null;
+  document.getElementById('edit-title').textContent='新增句子';
+  document.getElementById('edit-grammar').value='';
+  document.getElementById('edit-zh').value='';
+  document.getElementById('edit-en').value='';
+  document.getElementById('modal-overlay').style.display='flex';
+}
+function openEdit(id){
+  var s=sentences.find(function(x){return x.id===id});
+  if(!s)return;
+  editingId=id;
+  document.getElementById('edit-title').textContent='編輯句子';
+  document.getElementById('edit-grammar').value=s.grammar;
+  document.getElementById('edit-zh').value=s.zh;
+  document.getElementById('edit-en').value=s.en;
+  document.getElementById('modal-overlay').style.display='flex';
+}
+function closeEdit(){document.getElementById('modal-overlay').style.display='none'}
+function closeEditIfOutside(e){if(e.target.id==='modal-overlay')closeEdit()}
+function saveEdit(){
+  var g=document.getElementById('edit-grammar').value.trim();
+  var zh=document.getElementById('edit-zh').value.trim();
+  var en=document.getElementById('edit-en').value.trim();
+  if(!g||!zh)return;
+  if(editingId){
+    var s=sentences.find(function(x){return x.id===editingId});
+    if(s){s.grammar=g;s.zh=zh;s.en=en}
+  }else{
+    sentences.push({id:nextId++,grammar:g,zh:zh,en:en,bookmarked:false});
+  }
+  closeEdit();renderLibrary();
+}
+
+function importSentences(){
+  var raw=document.getElementById('import-area').value.trim();
+  var lines=raw.split('\n').filter(function(l){return l.trim()});
+  var added=0,skipped=0;
+  lines.forEach(function(line){
+    var parts=line.split('|').map(function(p){return p.trim()});
+    if(parts.length>=2&&parts[0]&&parts[1]){
+      sentences.push({id:nextId++,grammar:parts[0],zh:parts[1],en:parts[2]||'',bookmarked:false});
+      added++;
+    }else{skipped++}
+  });
+  var msg=document.getElementById('import-msg');
+  msg.style.color=added?'green':'red';
+  msg.textContent='✓ 成功導入 '+added+' 條句子'+(skipped?' ，跳過 '+skipped+' 行':'');
+  renderLibrary();renderFilters();
+}
+
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active')});
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active')});
+  document.querySelector('.tab[onclick="switchTab(\''+t+'\')"]').classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='practice')renderPractice();
+  if(t==='library')renderLibrary();
+}
+
+renderLibrary();
+</script>
