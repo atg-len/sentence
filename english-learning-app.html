@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="英文句庫">
+<title>英文句庫</title>
+<style>
+:root{
+  --bg:#fff;--bg2:#f5f5f5;--bg3:#e8e8e8;
+  --text:#111;--text2:#555;--text3:#999;
+  --border:#ddd;--border2:#bbb;
+  --blue:#1a6fc4;--blue-bg:#e8f0fc;--blue-text:#1a4f8a;
+  --amber-bg:#fff4d6;--amber-text:#9a6800;
+  --green:#1a7a1a;--red:#c0392b;
+  --r:12px;--rs:8px;--rp:24px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;
+    --text:#f2f2f7;--text2:#aeaeb2;--text3:#636366;
+    --border:#3a3a3c;--border2:#555;
+    --blue:#4a9eff;--blue-bg:#0a2540;--blue-text:#7ec8ff;
+    --amber-bg:#3a2800;--amber-text:#f0b429;
+    --green:#4caf50;--red:#ff6b6b;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{height:100%;display:flex;flex-direction:column;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;overflow:hidden}
+.hdr{display:flex;align-items:center;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top,12px));background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0}
+.hdr-title{font-size:18px;font-weight:700}
+.hdr-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px 90px}
+.bnav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);padding-bottom:max(8px,env(safe-area-inset-bottom,8px));z-index:100;flex-shrink:0}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:none;background:transparent;cursor:pointer;font-size:10px;color:var(--text3);font-family:inherit}
+.bnav-btn.on{color:var(--blue)}
+.bnav-ico{font-size:22px;line-height:1.2}
+.sec{display:none}.sec.on{display:block}
+.fab{position:fixed;right:20px;bottom:calc(62px + max(8px,env(safe-area-inset-bottom,8px)) + 12px);width:52px;height:52px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:28px;cursor:pointer;z-index:99;box-shadow:0 3px 12px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center}
+.fab.hide{display:none}
+.fscroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.fscroll::-webkit-scrollbar{display:none}
+.pill{padding:6px 14px;font-size:13px;border-radius:var(--rp);border:1px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);white-space:nowrap;font-family:inherit;flex-shrink:0}
+.pill.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+.sbox{position:relative;margin-bottom:12px}
+.sbox input{width:100%;padding:10px 12px 10px 36px;font-size:16px;border:1px solid var(--border2);border-radius:var(--rp);background:var(--bg2);color:var(--text);font-family:inherit;outline:none}
+.sbox input:focus{border-color:var(--blue)}
+.sico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none}
+.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.ctags{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.gtag{display:inline-block;padding:3px 10px;border-radius:var(--rp);font-size:12px;font-weight:600}
+.czh{font-size:15px;line-height:1.9;margin-bottom:4px;word-break:break-all}
+.cen{font-size:13px;color:var(--text2);font-style:italic;line-height:1.6}
+.cacts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.btn{padding:7px 13px;font-size:13px;border-radius:var(--rs);border:1px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);font-family:inherit}
+.btn.bm{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-text)}
+.btn.del{color:var(--red);border-color:var(--red)}
+.pbtn{padding:10px 20px;font-size:14px;font-weight:600;background:var(--blue);color:#fff;border:none;border-radius:var(--rs);cursor:pointer;font-family:inherit}
+.pbtn.sm{padding:8px 16px;font-size:13px}
+.pgwrap{margin-bottom:14px}
+.pglbl{font-size:12px;color:var(--text3);margin-bottom:5px}
+.pgbar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.pgfill{height:100%;background:var(--blue);border-radius:2px;transition:width .3s}
+.pcard{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:18px 14px;margin-bottom:10px}
+.bvoc{filter:blur(6px);-webkit-filter:blur(6px);cursor:pointer;display:inline;border-radius:4px;padding:0 3px;background:var(--blue-bg);color:var(--blue-text);transition:filter .3s;user-select:none;-webkit-user-select:none}
+.bvoc.show{filter:none;-webkit-filter:none}
+.bgram{filter:blur(6px);-webkit-filter:blur(6px);cursor:pointer;display:inline-block;border-radius:var(--rp);padding:3px 12px;font-size:12px;font-weight:600;transition:filter .3s;user-select:none;-webkit-user-select:none}
+.bgram.show{filter:none;-webkit-filter:none}
+.pzh{font-size:16px;line-height:2.1;margin:12px 0;word-break:break-all}
+.phint{font-size:12px;color:var(--text3)}
+.pacts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.ansbox{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.ansbox p{font-size:14px;color:var(--text2);font-style:italic;line-height:1.7}
+.ifmt{background:var(--bg2);border-radius:var(--rs);padding:12px;font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:12px}
+.ifmt code{font-size:11px;background:var(--bg3);padding:2px 5px;border-radius:3px;font-family:monospace}
+.itarea{width:100%;min-height:110px;resize:vertical;padding:11px;font-size:15px;line-height:1.7;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);font-family:inherit;outline:none}
+.itarea:focus{border-color:var(--blue)}
+.imsg{margin-top:10px;font-size:13px;padding:8px 12px;border-radius:var(--rs)}
+.imsg.ok{background:#e8f5e9;color:var(--green)}
+.imsg.err{background:#fdecea;color:var(--red)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 16px}
+.overlay.on{display:block}
+.modal{background:var(--bg);border-radius:var(--r);padding:20px 16px;width:100%;max-width:480px;margin:0 auto;border:1px solid var(--border2)}
+.modal h2{font-size:17px;font-weight:700;margin-bottom:16px}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:12px;color:var(--text2);font-weight:600;margin-bottom:4px}
+.fg input,.fg textarea{width:100%;padding:10px 11px;font-size:16px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--text);font-family:inherit;outline:none}
+.fg input:focus,.fg textarea:focus{border-color:var(--blue)}
+.fg textarea{min-height:75px;resize:vertical;line-height:1.6}
+.macts{display:flex;gap:8px;margin-top:14px}
+.empty{text-align:center;padding:40px 0;color:var(--text3)}
+.empty-ico{font-size:44px;margin-bottom:10px}
+.empty p{font-size:14px;line-height:1.8}
+.bksec{margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.bklbl{font-size:13px;color:var(--text2);margin-bottom:10px}
+.bkrow{display:flex;gap:8px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div>
+    <div class="hdr-title">英文句庫</div>
+    <div class="hdr-sub" id="hdr-sub">載入中...</div>
+  </div>
+</div>
+<div class="main" id="main">
+  <div class="sec on" id="sec-lib">
+    <div class="sbox">
+      <span class="sico">🔍</span>
+      <input type="search" id="q" placeholder="搜尋句子..." oninput="renderLib()">
+    </div>
+    <div class="fscroll" id="lib-filters"></div>
+    <div id="lib-list"></div>
+  </div>
+  <div class="sec" id="sec-prac">
+    <div class="fscroll" id="prac-filters"></div>
+    <div class="pgwrap">
+      <div class="pglbl" id="pg-lbl">0 / 0</div>
+      <div class="pgbar"><div class="pgfill" id="pg-fill" style="width:0%"></div></div>
+    </div>
+    <div id="prac-area"></div>
+  </div>
+  <div class="sec" id="sec-imp">
+    <div class="ifmt">
+      每行一句，格式：<br>
+      <code>語法分類 | 中文句子 | 英文句子</code><br>
+      括號 <code>(詞彙1 / 詞彙2)</code> 練習時模糊，點擊顯示
+    </div>
+    <textarea class="itarea" id="imp-area" placeholder="Reduced Relative Clause | 住在繁忙城市(busy / densely populated cities)的學生，往往承受更大(greater / heavier)的學業(academic)壓力。 | Students living in busy cities tend to face greater academic pressure."></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="pbtn sm" onclick="doImport()">導入句子</button>
+      <button class="btn" onclick="document.getElementById('imp-area').value=''">清空</button>
+    </div>
+    <div id="imp-msg"></div>
+    <div class="bksec">
+      <div class="bklbl">📦 資料備份（儲存到檔案）</div>
+      <div class="bkrow">
+        <button class="btn" onclick="exportJSON()">匯出 JSON</button>
+        <button class="btn" onclick="document.getElementById('imp-file').click()">匯入備份</button>
+      </div>
+      <input type="file" id="imp-file" accept=".json" style="display:none" onchange="importJSON(event)">
+    </div>
+  </div>
+</div>
+<button class="fab" id="fab" onclick="openAdd()">+</button>
+<nav class="bnav">
+  <button class="bnav-btn on" id="nb-lib" onclick="goTab('lib')">
+    <span class="bnav-ico">📚</span>句庫
+  </button>
+  <button class="bnav-btn" id="nb-prac" onclick="goTab('prac')">
+    <span class="bnav-ico">✏️</span>練習
+  </button>
+  <button class="bnav-btn" id="nb-imp" onclick="goTab('imp')">
+    <span class="bnav-ico">📥</span>導入
+  </button>
+</nav>
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal" id="modal">
+    <h2 id="modal-title">新增句子</h2>
+    <div class="fg">
+      <label>語法分類</label>
+      <input type="text" id="f-gram" placeholder="e.g. Reduced Relative Clause" list="gram-dl" autocomplete="off">
+      <datalist id="gram-dl"></datalist>
+    </div>
+    <div class="fg">
+      <label>中文句子（括號內詞彙練習時模糊）</label>
+      <textarea id="f-zh" rows="3" placeholder="住在繁忙城市(busy / densely populated cities)的學生..."></textarea>
+    </div>
+    <div class="fg">
+      <label>英文句子</label>
+      <textarea id="f-en" rows="2" placeholder="Students living in busy cities..."></textarea>
+    </div>
+    <div class="macts">
+      <button class="pbtn sm" onclick="saveModal()">儲存</button>
+      <button class="btn" onclick="closeModal()">取消</button>
+    </div>
+  </div>
+</div>
+<script>
+var COLORS=[
+  ['#cde4ff','#0b5394'],['#d4f1e4','#0f5132'],['#fff0c2','#7a5700'],
+  ['#ffd6e8','#7a1f4a'],['#ddf4c2','#2d5a0e'],['#ffd6c2','#7a2e0e'],
+  ['#e2d4f8','#4a2a85'],['#e0e0e0','#444444']
+];
+var SAMPLE=[
+  {id:1,grammar:'Reduced Relative Clause',zh:'住在繁忙城市(busy / densely populated cities)的學生，往往承受更大(greater / heavier)的學業(academic)壓力。',en:'Students living in busy cities tend to face greater academic pressure.',bm:false},
+  {id:2,grammar:'Passive Voice',zh:'這本書(book / novel)是由一位著名(famous / renowned)作家所撰寫的。',en:'This book was written by a famous author.',bm:false},
+  {id:3,grammar:'Conditional Sentence',zh:'如果學生(students)每天練習(practise / review)英文，他們的成績(grades / results)會大幅提升。',en:'If students practise English every day, their grades will improve significantly.',bm:false}
+];
+var sents=[];
+var nid=10;
+var gramIdx={};
+var editId=null;
+var libF='all';
+var pracF='all';
+var pool=[];
+var pidx=0;
+var curTab='lib';
+
+function tryLoad(){
+  try{var r=localStorage.getItem('ekb3');if(r){var d=JSON.parse(r);if(d&&d.s&&d.s.length){sents=d.s;nid=d.n||100;return;}}}catch(e){}
+  sents=JSON.parse(JSON.stringify(SAMPLE));nid=10;
+}
+function trySave(){try{localStorage.setItem('ekb3',JSON.stringify({s:sents,n:nid}));}catch(e){}}
+
+function gColor(g){
+  if(gramIdx[g]===undefined)gramIdx[g]=Object.keys(gramIdx).length%COLORS.length;
+  return COLORS[gramIdx[g]];
+}
+function allGrams(){return[...new Set(sents.map(function(s){return s.grammar}))];}
+function h(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function updHdr(){var bm=sents.filter(function(s){return s.bm;}).length;document.getElementById('hdr-sub').textContent=sents.length+' 句 · ⭐ '+bm;}
+
+function goTab(t){
+  curTab=t;
+  ['lib','prac','imp'].forEach(function(x){
+    document.getElementById('sec-'+x).classList.toggle('on',x===t);
+    document.getElementById('nb-'+x).classList.toggle('on',x===t);
+  });
+  document.getElementById('fab').classList.toggle('hide',t!=='lib');
+  document.getElementById('main').scrollTop=0;
+  if(t==='prac')initPrac();
+  if(t==='lib')renderLib();
+}
+
+function setLibF(f){libF=f;renderLib();}
+function renderLibFilters(){
+  var gs=allGrams();
+  var o='<button class="pill'+(libF==='all'?' on':'')+'" onclick="setLibF(\'all\')">全部</button>';
+  o+='<button class="pill'+(libF==='bookmarked'?' on':'')+'" onclick="setLibF(\'bookmarked\')">⭐ 已標記</button>';
+  gs.forEach(function(g){
+    var c=gColor(g);var a=libF===g;
+    o+='<button class="pill" style="'+(a?'background:'+c[0]+';color:'+c[1]+';border-color:'+c[1]+';':'')+'" onclick="setLibF(this.dataset.g)" data-g="'+h(g)+'">'+h(g)+'</button>';
+  });
+  document.getElementById('lib-filters').innerHTML=o;
+  document.getElementById('gram-dl').innerHTML=gs.map(function(g){return'<option value="'+h(g)+'">';}).join('');
+}
+
+function renderLib(){
+  renderLibFilters();
+  var q=(document.getElementById('q').value||'').toLowerCase();
+  var items=sents.filter(function(s){
+    var mf=libF==='all'||(libF==='bookmarked'&&s.bm)||(s.grammar===libF);
+    var mq=!q||s.zh.toLowerCase().indexOf(q)>=0||s.en.toLowerCase().indexOf(q)>=0||s.grammar.toLowerCase().indexOf(q)>=0;
+    return mf&&mq;
+  });
+  var el=document.getElementById('lib-list');
+  if(!items.length){el.innerHTML='<div class="empty"><div class="empty-ico">📭</div><p>沒有找到句子</p></div>';return;}
+  el.innerHTML=items.map(function(s){
+    var c=gColor(s.grammar);
+    var zh=s.zh.replace(/\(([^)]+)\)/g,'<span style="font-size:11px;color:var(--text3)">($1)</span>');
+    return'<div class="card">'+
+      '<div class="ctags"><span class="gtag" style="background:'+c[0]+';color:'+c[1]+'">'+h(s.grammar)+'</span>'+(s.bm?'<span style="font-size:13px;color:var(--amber-text)">⭐</span>':'')+'</div>'+
+      '<div class="czh">'+zh+'</div>'+
+      '<div class="cen">'+h(s.en)+'</div>'+
+      '<div class="cacts">'+
+        '<button class="btn'+(s.bm?' bm':'')+'" onclick="toggleBm('+s.id+')">'+(s.bm?'⭐ 已標記':'☆ 標記')+'</button>'+
+        '<button class="btn" onclick="openEdit('+s.id+')">✏ 編輯</button>'+
+        '<button class="btn del" onclick="delS('+s.id+')">✕ 刪除</button>'+
+      '</div></div>';
+  }).join('');
+  updHdr();
+}
+
+function toggleBm(id){
+  var s=sents.find(function(x){return x.id===id;});
+  if(s){s.bm=!s.bm;trySave();renderLib();}
+}
+function delS(id){
+  if(!confirm('確認刪除？'))return;
+  sents=sents.filter(function(s){return s.id!==id;});
+  trySave();renderLib();
+}
+
+function setPracF(f){pracF=f;initPrac();}
+function renderPracFilters(){
+  var gs=allGrams();
+  var o='<button class="pill'+(pracF==='all'?' on':'')+'" onclick="setPracF(\'all\')">全部</button>';
+  o+='<button class="pill'+(pracF==='bookmarked'?' on':'')+'" onclick="setPracF(\'bookmarked\')">⭐ 已標記</button>';
+  gs.forEach(function(g){
+    var c=gColor(g);var a=pracF===g;
+    o+='<button class="pill" style="'+(a?'background:'+c[0]+';color:'+c[1]+';border-color:'+c[1]+';':'')+'" onclick="setPracF(this.dataset.g)" data-g="'+h(g)+'">'+h(g)+'</button>';
+  });
+  document.getElementById('prac-filters').innerHTML=o;
+}
+function initPrac(){
+  renderPracFilters();
+  pool=sents.filter(function(s){
+    return pracF==='all'||(pracF==='bookmarked'&&s.bm)||(s.grammar===pracF);
+  }).sort(function(){return Math.random()-.5;});
+  pidx=0;showCard();
+}
+function showCard(){
+  var area=document.getElementById('prac-area');
+  if(!pool.length){
+    area.innerHTML='<div class="empty"><div class="empty-ico">📝</div><p>沒有句子可練習<br>請先在句庫新增句子</p><br><br><button class="pbtn sm" onclick="goTab(\'lib\')">去句庫</button></div>';
+    document.getElementById('pg-lbl').textContent='0 / 0';
+    document.getElementById('pg-fill').style.width='0%';
+    return;
+  }
+  var pct=Math.round(pidx/pool.length*100);
+  document.getElementById('pg-lbl').textContent=(pidx+1)+' / '+pool.length;
+  document.getElementById('pg-fill').style.width=pct+'%';
+  var s=pool[pidx];
+  var c=gColor(s.grammar);
+  var isLast=(pidx+1>=pool.length);
+  var zh=s.zh.replace(/\(([^)]+)\)/g,function(m,v){
+    return'<span class="bvoc" onclick="this.classList.add(\'show\')">'+h(v)+'</span>';
+  });
+  area.innerHTML=
+    '<div class="pcard">'+
+      '<span class="bgram" id="gbadge" style="background:'+c[0]+';color:'+c[1]+'" onclick="document.getElementById(\'gbadge\').classList.add(\'show\')">'+h(s.grammar)+'</span>'+
+      '<div class="pzh">'+zh+'</div>'+
+      '<div class="phint">👆 點擊模糊文字顯示提示</div>'+
+      '<div class="pacts">'+
+        '<button class="btn" onclick="revealAll()">全部顯示</button>'+
+        '<button class="btn" onclick="showAns()">看英文</button>'+
+        '<button class="btn'+(s.bm?' bm':'')+'" id="bm-btn" onclick="pracBm('+s.id+')">'+(s.bm?'⭐':'☆')+'</button>'+
+        '<button class="pbtn sm" style="margin-left:auto" onclick="'+(isLast?'initPrac()':'nextCard()')+'">'+(isLast?'重新開始 🔄':'下一句 →')+'</button>'+
+      '</div>'+
+      '<div class="ansbox" id="ans-box"><p>'+h(s.en)+'</p></div>'+
+    '</div>';
+}
+function revealAll(){document.querySelectorAll('.bvoc,.bgram').forEach(function(el){el.classList.add('show');});}
+function showAns(){var a=document.getElementById('ans-box');if(a)a.style.display='block';}
+function nextCard(){pidx++;showCard();}
+function pracBm(id){
+  var s=sents.find(function(x){return x.id===id;});
+  if(s){s.bm=!s.bm;trySave();}
+  var btn=document.getElementById('bm-btn');
+  if(s&&btn){btn.className='btn'+(s.bm?' bm':'');btn.textContent=s.bm?'⭐':'☆';}
+}
+
+function openAdd(){
+  editId=null;
+  document.getElementById('modal-title').textContent='新增句子';
+  document.getElementById('f-gram').value='';
+  document.getElementById('f-zh').value='';
+  document.getElementById('f-en').value='';
+  document.getElementById('overlay').classList.add('on');
+}
+function openEdit(id){
+  var s=sents.find(function(x){return x.id===id;});if(!s)return;
+  editId=id;
+  document.getElementById('modal-title').textContent='編輯句子';
+  document.getElementById('f-gram').value=s.grammar;
+  document.getElementById('f-zh').value=s.zh;
+  document.getElementById('f-en').value=s.en;
+  document.getElementById('overlay').classList.add('on');
+}
+function closeModal(){document.getElementById('overlay').classList.remove('on');}
+function overlayClick(e){if(e.target===document.getElementById('overlay'))closeModal();}
+function saveModal(){
+  var g=document.getElementById('f-gram').value.trim();
+  var zh=document.getElementById('f-zh').value.trim();
+  var en=document.getElementById('f-en').value.trim();
+  if(!g||!zh){alert('請填寫語法分類和中文句子');return;}
+  if(editId){
+    var s=sents.find(function(x){return x.id===editId;});
+    if(s){s.grammar=g;s.zh=zh;s.en=en;}
+  }else{
+    sents.push({id:nid++,grammar:g,zh:zh,en:en,bm:false});
+  }
+  trySave();closeModal();renderLib();
+}
+
+function doImport(){
+  var raw=document.getElementById('imp-area').value.trim();
+  var lines=raw.split('\n').filter(function(l){return l.trim();});
+  var added=0,skip=0;
+  lines.forEach(function(line){
+    var p=line.split('|').map(function(x){return x.trim();});
+    if(p.length>=2&&p[0]&&p[1]){sents.push({id:nid++,grammar:p[0],zh:p[1],en:p[2]||'',bm:false});added++;}
+    else if(line.trim()){skip++;}
+  });
+  trySave();
+  var msg=document.getElementById('imp-msg');
+  if(added){
+    msg.className='imsg ok';
+    msg.textContent='✓ 成功導入 '+added+' 條句子'+(skip?'，跳過 '+skip+' 行':'');
+    document.getElementById('imp-area').value='';
+    renderLib();
+  }else{
+    msg.className='imsg err';
+    msg.textContent='❌ 格式錯誤，請確認格式：語法 | 中文 | 英文';
+  }
+}
+function exportJSON(){
+  var blob=new Blob([JSON.stringify({s:sents,n:nid},null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='英文句庫備份.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+function importJSON(e){
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    try{
+      var d=JSON.parse(ev.target.result);
+      if(d&&Array.isArray(d.s)){sents=d.s;nid=d.n||nid+100;trySave();renderLib();alert('✓ 載入成功！共 '+sents.length+' 句');}
+      else{alert('格式錯誤');}
+    }catch(ex){alert('無法讀取檔案');}
+  };
+  r.readAsText(f);e.target.value='';
+}
+
+tryLoad();
+renderLib();
+</script>
+</body>
+</html>
